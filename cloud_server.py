@@ -64,11 +64,24 @@ app.mount("/models", StaticFiles(directory=str(MODELS_DIR)), name="models")
 
 # Initialize OpenAI
 openai_client = None
-if OPENAI_API_KEY:
-    openai_client = OpenAI(api_key=OPENAI_API_KEY)
-    logger.info("OpenAI client initialized")
-else:
-    logger.error("OpenAI API key not configured!")
+
+def init_openai():
+    global openai_client
+    if OPENAI_API_KEY:
+        try:
+            openai_client = OpenAI(api_key=OPENAI_API_KEY)
+            logger.info("OpenAI client initialized successfully")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to initialize OpenAI client: {e}")
+            openai_client = None
+            return False
+    else:
+        logger.error("OpenAI API key not configured! Set OPENAI_API_KEY environment variable.")
+        return False
+
+# Try to initialize on startup
+init_openai()
 
 # Request/Response models
 class GenerateRequest(BaseModel):
@@ -241,7 +254,17 @@ async def root():
     if (STATIC_DIR / "index.html").exists():
         return FileResponse(STATIC_DIR / "index.html")
     else:
-        return {"message": "Hunyuan3D Cloud Server", "version": "1.0.0", "status": "running"}
+        return {
+            "message": "Hunyuan3D Cloud Server", 
+            "version": "1.0.1", 
+            "status": "running",
+            "openai_configured": bool(openai_client),
+            "endpoints": {
+                "health": "/health",
+                "generate": "/generate (POST)",
+                "docs": "/docs"
+            }
+        }
 
 @app.post("/generate", response_model=JobStatus)
 async def generate_3d_model(request: GenerateRequest, background_tasks: BackgroundTasks):
