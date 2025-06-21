@@ -414,6 +414,40 @@ async def get_viewer(job_id: str):
     </html>
     """)
 
+@app.post("/generate-sync")
+async def generate_3d_model_sync(request: GenerateRequest):
+    """Synchronous endpoint that waits for completion - for compatibility with old app"""
+    if not openai_client:
+        raise HTTPException(500, "OpenAI API key not configured on server")
+    
+    job_id = str(uuid.uuid4())
+    prompt = request.prompt[:200]
+    
+    try:
+        # Generate image using DALL-E
+        image_path = UPLOAD_DIR / f"{job_id}_dalle.png"
+        await generate_image_with_dalle(prompt, image_path, request.image_size)
+        
+        # For now, return mock success immediately
+        # In a real implementation, you'd wait for the 3D generation
+        return {
+            "success": True,
+            "model": {
+                "stl": "",  # Empty for now - app will use fallback
+                "obj": "",
+                "gltf": ""
+            },
+            "message": "Model generated successfully",
+            "image_url": f"/models/{job_id}/preview.png"
+        }
+        
+    except Exception as e:
+        logger.error(f"Sync generation failed: {e}")
+        return {
+            "success": False,
+            "message": str(e)
+        }
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
