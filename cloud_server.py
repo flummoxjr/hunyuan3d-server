@@ -174,7 +174,8 @@ async def simulate_3d_generation(
     job_id: str,
     image_path: str,
     model_variant: str,
-    export_format: str
+    export_format: str,
+    prompt: str = "3D model"
 ):
     """Simulate 3D generation (replace with actual Hunyuan3D when available)"""
     try:
@@ -298,7 +299,8 @@ async def generate_3d_model(request: GenerateRequest, background_tasks: Backgrou
             job_id,
             str(image_path),
             request.model_variant,
-            request.export_format
+            request.export_format,
+            prompt
         )
         
         return job
