@@ -228,9 +228,152 @@ f 1 3 7 5
 f 2 6 8 4
 """
             model_file.write_text(obj_content)
-        else:
-            # Placeholder for other formats
-            model_file.write_text(f"Placeholder {export_format.upper()} model\nGenerated from: {prompt}")
+        elif export_format == "stl":
+            # Generate a simple ASCII STL cube
+            stl_content = """solid cube
+  facet normal 0.0 0.0 -1.0
+    outer loop
+      vertex -1.0 -1.0 -1.0
+      vertex 1.0 -1.0 -1.0
+      vertex 1.0 1.0 -1.0
+    endloop
+  endfacet
+  facet normal 0.0 0.0 -1.0
+    outer loop
+      vertex -1.0 -1.0 -1.0
+      vertex 1.0 1.0 -1.0
+      vertex -1.0 1.0 -1.0
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -1.0 -1.0 1.0
+      vertex 1.0 1.0 1.0
+      vertex 1.0 -1.0 1.0
+    endloop
+  endfacet
+  facet normal 0.0 0.0 1.0
+    outer loop
+      vertex -1.0 -1.0 1.0
+      vertex -1.0 1.0 1.0
+      vertex 1.0 1.0 1.0
+    endloop
+  endfacet
+  facet normal 0.0 -1.0 0.0
+    outer loop
+      vertex -1.0 -1.0 -1.0
+      vertex 1.0 -1.0 1.0
+      vertex 1.0 -1.0 -1.0
+    endloop
+  endfacet
+  facet normal 0.0 -1.0 0.0
+    outer loop
+      vertex -1.0 -1.0 -1.0
+      vertex -1.0 -1.0 1.0
+      vertex 1.0 -1.0 1.0
+    endloop
+  endfacet
+  facet normal 0.0 1.0 0.0
+    outer loop
+      vertex -1.0 1.0 -1.0
+      vertex 1.0 1.0 -1.0
+      vertex 1.0 1.0 1.0
+    endloop
+  endfacet
+  facet normal 0.0 1.0 0.0
+    outer loop
+      vertex -1.0 1.0 -1.0
+      vertex 1.0 1.0 1.0
+      vertex -1.0 1.0 1.0
+    endloop
+  endfacet
+  facet normal -1.0 0.0 0.0
+    outer loop
+      vertex -1.0 -1.0 -1.0
+      vertex -1.0 1.0 -1.0
+      vertex -1.0 1.0 1.0
+    endloop
+  endfacet
+  facet normal -1.0 0.0 0.0
+    outer loop
+      vertex -1.0 -1.0 -1.0
+      vertex -1.0 1.0 1.0
+      vertex -1.0 -1.0 1.0
+    endloop
+  endfacet
+  facet normal 1.0 0.0 0.0
+    outer loop
+      vertex 1.0 -1.0 -1.0
+      vertex 1.0 1.0 1.0
+      vertex 1.0 1.0 -1.0
+    endloop
+  endfacet
+  facet normal 1.0 0.0 0.0
+    outer loop
+      vertex 1.0 -1.0 -1.0
+      vertex 1.0 -1.0 1.0
+      vertex 1.0 1.0 1.0
+    endloop
+  endfacet
+endsolid cube
+"""
+            model_file.write_text(stl_content)
+        elif export_format == "glb":
+            # For GLB, we need to create a proper binary file
+            # For now, create a minimal valid GLTF JSON
+            gltf_content = """{
+    "asset": {"version": "2.0"},
+    "scene": 0,
+    "scenes": [{"nodes": [0]}],
+    "nodes": [{"mesh": 0}],
+    "meshes": [{
+        "primitives": [{
+            "attributes": {
+                "POSITION": 0
+            },
+            "indices": 1
+        }]
+    }],
+    "buffers": [{
+        "byteLength": 168
+    }],
+    "bufferViews": [
+        {
+            "buffer": 0,
+            "byteOffset": 0,
+            "byteLength": 96,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 96,
+            "byteLength": 72,
+            "target": 34963
+        }
+    ],
+    "accessors": [
+        {
+            "bufferView": 0,
+            "byteOffset": 0,
+            "componentType": 5126,
+            "count": 8,
+            "type": "VEC3",
+            "max": [1.0, 1.0, 1.0],
+            "min": [-1.0, -1.0, -1.0]
+        },
+        {
+            "bufferView": 1,
+            "byteOffset": 0,
+            "componentType": 5123,
+            "count": 36,
+            "type": "SCALAR"
+        }
+    ]
+}"""
+            # Save as GLTF for now (GLB would need binary data)
+            model_file.with_suffix('.gltf').write_text(gltf_content)
+            # Also create the GLB file
+            model_file.write_text("GLB format requires binary data - using GLTF instead")
         
         # Update job completion
         jobs[job_id].status = "completed"
